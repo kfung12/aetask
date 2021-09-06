@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ae_service_ship.Models;
+using ae_service_ship.Repositories;
 
 namespace ae_service_ship
 {
@@ -28,6 +29,7 @@ namespace ae_service_ship
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IShipsRepository, InMemoryShipsRepository>();
 
             services.AddControllers();
 

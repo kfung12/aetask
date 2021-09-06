@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ae_service_ship.Models;
 using ae_service_ship.ViewModels;
-using System.Data.Entity.SqlServer;
-using System.Diagnostics;
+using ae_service_ship.Repositories;
+using ae_service_ship.Utils;
 
 namespace ae_service_ship.Controllers
 {
@@ -16,24 +16,25 @@ namespace ae_service_ship.Controllers
     [ApiController]
     public class ShipsController : ControllerBase
     {
-        private readonly Models.AEDbContext _context;
 
-        public ShipsController(Models.AEDbContext context)
+        private readonly IShipsRepository repository;
+
+        //private readonly AEDbContext _context;
+
+        public ShipsController(IShipsRepository repository)
         {
-            _context = context;
+            this.repository = repository;
         }
 
-        // GET: api/Ships
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ShipDto>>> GetShips()
+        public ActionResult<IEnumerable<ShipDto>> GetShips()
         {
-            return await _context.Ships
-                .Select(s => MaptoShipDto(s)).ToListAsync();
+            return repository.GetShips().ToList();
+
         }
 
-        // PUT: api/Ships/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateShip(long id, ShipDto shipDto)
+        public IActionResult UpdateShip(long id, ShipDto shipDto)
         {
             if (id != shipDto.Id)
             {
@@ -71,9 +72,8 @@ namespace ae_service_ship.Controllers
             return NoContent();
         }
 
-        // POST: api/Ships
         [HttpPost]
-        public async Task<ActionResult<Ship>> CreateShip(ShipDto shipDto)
+        public ActionResult<Ship> CreateShip(ShipDto shipDto)
         {
             var ship = new Ship
             {
@@ -92,7 +92,7 @@ namespace ae_service_ship.Controllers
 
         [HttpGet]
         [Route("getClosestPort/{shipId}")]
-        public async Task<ActionResult<PortInfoDto>> GetClosestPort(long shipId)
+        public ActionResult<PortInfoDto> GetClosestPort(long shipId)
         {
             var ship = await _context.Ships.FindAsync(shipId);
             if (ship == null)
@@ -104,6 +104,7 @@ namespace ae_service_ship.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Velocity information is missing");
             }
 
+            //TODO: repository
             //miles to let in deg = 3959
             //180/pi = 57.29
             var result = from p in _context.Ports
@@ -129,17 +130,6 @@ namespace ae_service_ship.Controllers
             return _context.Ships.Any(e => e.Id == id);
         }
 
-        private static ShipDto MaptoShipDto(Ship ship)
-        {
-            return new ShipDto
-            {
-                Id = ship.Id,
-                Name = ship.Name,
-                Lat = ship.Lat,
-                Long = ship.Long,
-                Velocity = ship.Velocity
-            };
-        }
         //private static double ConvertToRadian(decimal deg)
         //{
         //    return (double) deg * Math.PI / 180;
