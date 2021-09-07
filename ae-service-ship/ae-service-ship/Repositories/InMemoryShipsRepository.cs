@@ -40,7 +40,6 @@ namespace ae_service_ship.Repositories
 
         public async Task<Ship> CreateShipAsync(Ship ship)
         {
-            ship.Id = ships.Max(s => s.Id) + 1; //TODO: read db auto increment
             ships.Add(ship);
             return await Task.FromResult(ship);
         }
@@ -79,6 +78,11 @@ namespace ae_service_ship.Repositories
             }).FirstOrDefault();
 
             return await Task.FromResult(result);
+        }
+
+        public async Task<long> GetNewId()
+        {
+            return await Task.FromResult(ships.Max(s => s.Id) + 1);
         }
 
         //private static double ConvertToRadian(decimal deg)

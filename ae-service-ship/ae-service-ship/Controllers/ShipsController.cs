@@ -40,6 +40,25 @@ namespace ae_service_ship.Controllers
             return ship.MaptoShipDto();
         }
 
+        [HttpPost]
+        public async Task<ActionResult<ShipDto>> CreateShipAsync(ShipDto shipDto)
+        {
+            long newId = await repository.GetNewId(); //TODO: read db auto increment
+
+            var ship = new Ship
+            {
+                Id = newId,
+                Name = shipDto.Name,
+                Lat = shipDto.Lat,
+                Long = shipDto.Long,
+                Velocity = shipDto.Velocity
+            };
+
+            var createdShip = await repository.CreateShipAsync(ship);
+
+            return CreatedAtAction(nameof(GetShipAsync), new { id = newId }, ship.MaptoShipDto());
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateShipAsync(long id, ShipDto shipDto)
         {
@@ -67,23 +86,6 @@ namespace ae_service_ship.Controllers
             return NoContent();
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ShipDto>> CreateShipAsync(ShipDto shipDto)
-        {
-
-            var ship = new Ship
-            {
-                Name = shipDto.Name,
-                Lat = shipDto.Lat,
-                Long = shipDto.Long,
-                Velocity = shipDto.Velocity
-            };
-
-            var createdShip = await repository.CreateShipAsync(ship);
-
-            return CreatedAtAction(nameof(GetShipAsync), new { id = createdShip.Id }, createdShip.MaptoShipDto());
-        }
-
         [HttpGet]
         [Route("getClosestPort/{shipId}")]
         public async Task<ActionResult<PortInfoDto>> GetClosestPortAsync(long shipId)
@@ -93,9 +95,9 @@ namespace ae_service_ship.Controllers
             {
                 return NotFound();
             }
-            else if (!ship.Velocity.HasValue || ship.Velocity == 0)
+            else if (!ship.Velocity.HasValue || ship.Velocity <= 0)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Velocity information is missing or it is zero");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Velocity information is missing or v<=0");
             }
 
             return await repository.GetClosestPortAsync(ship);

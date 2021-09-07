@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 namespace ae_service_ship.Repositories
 {
     public interface IShipsRepository
-    {       
+    {
+        Task<long> GetNewId();
         Task<IEnumerable<Ship>> GetShipsAsync();
 
         Task<Ship> GetShipAsync(long id);
