@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/ae-service-ship/.vs/ae-service-ship
+/ae-service-ship/ae-service-ship/bin/Debug/net5.0
+/ae-service-ship/ae-service-ship/obj
+/ae-service-ship/ae-service-ship.UnitTests/bin/Debug/net5.0
+/ae-service-ship/ae-service-ship.UnitTests/obj
