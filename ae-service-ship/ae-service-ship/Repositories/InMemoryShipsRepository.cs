@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ae_service_ship.Utils;
 
 namespace ae_service_ship.Repositories
 {
@@ -28,21 +27,63 @@ namespace ae_service_ship.Repositories
             new Ship { Id = 5, Name = "Ship5", Lat = -5.080000M, Long = 10.540000M}
         };
 
-        public IEnumerable<ShipDto> GetShips()
+        public async Task<IEnumerable<Ship>> GetShipsAsync()
         {
-            return ships.Select(s => s.MaptoShipDto());
+            return await Task.FromResult(ships);
         }
 
-        public ShipDto GetShip(long id)
+        public async Task<Ship> GetShipAsync(long id)
         {
-            return ships.Where(s => s.Id == id).Select(s => s.MaptoShipDto()).SingleOrDefault();
+            var ship = ships.Where(s => s.Id == id).FirstOrDefault();
+            return await Task.FromResult(ship);
         }
 
-        //public IEnumerable<Port> GetPorts()
+        public async Task<Ship> CreateShipAsync(Ship ship)
+        {
+            ship.Id = ships.Max(s => s.Id) + 1; //TODO: read db auto increment
+            ships.Add(ship);
+            return await Task.FromResult(ship);
+        }
+
+        public async Task UpdateShipAsync(Ship ship)
+        {
+            var idx = ships.FindIndex(s => s.Id == ship.Id);
+            ships[idx] = ship;
+            await Task.CompletedTask;
+        }
+
+        public async Task<PortInfoDto> GetClosestPortAsync(Ship ship)
+        {
+            //var ship = ships.Where(s => s.Id == shipId).SingleOrDefault();
+            //if (ship == null || !ship.Velocity.HasValue || ship.Velocity.Value == 0)
+            //{
+            //    return null;
+            //}
+
+            //miles to let in deg = 3959
+            //180/pi = 57.29
+            var query = from p in ports
+                         let distance = 3959 * Math.Acos(
+                             Math.Sin((double)p.Lat / 57.29) * Math.Sin((double)ship.Lat / 57.29) +
+                             Math.Cos((double)p.Lat / 57.29) * Math.Cos((double)ship.Lat / 57.29) *
+                             Math.Cos((double)p.Long / 57.29 - (double)ship.Long / 57.29)
+                             )
+                         orderby distance
+                         select new { p, distance };
+
+            var result = query.Select(r => new PortInfoDto()
+            {
+                Port = new PortDto() { Name = r.p.Name, Lat = r.p.Lat, Long = r.p.Long },
+                Distance = (decimal)r.distance,
+                ETA = (decimal)r.distance / ship.Velocity.Value
+            }).FirstOrDefault();
+
+            return await Task.FromResult(result);
+        }
+
+        //private static double ConvertToRadian(decimal deg)
         //{
-        //    return ports;
+        //    return (double)deg * Math.PI / 180;
         //}
-        public Ship
-
     }
 }

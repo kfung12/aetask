@@ -1,13 +1,20 @@
 ﻿using ae_service_ship.Models;
 using ae_service_ship.ViewModels;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ae_service_ship.Repositories
 {
     public interface IShipsRepository
-    {
-        //IEnumerable<PortDto> GetPorts();
-        ShipDto GetShip(long id);
-        IEnumerable<ShipDto> GetShips();
+    {       
+        Task<IEnumerable<Ship>> GetShipsAsync();
+
+        Task<Ship> GetShipAsync(long id);
+
+        Task<Ship> CreateShipAsync(Ship ship);
+
+        Task UpdateShipAsync(Ship ship);
+
+        Task<PortInfoDto> GetClosestPortAsync(Ship ship);
     }
 }

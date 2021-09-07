@@ -1,19 +1,10 @@
+using ae_service_ship.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using ae_service_ship.Models;
-using ae_service_ship.Repositories;
 
 namespace ae_service_ship
 {
@@ -31,15 +22,16 @@ namespace ae_service_ship
         {
             services.AddSingleton<IShipsRepository, InMemoryShipsRepository>();
 
-            services.AddControllers();
+            services.AddControllers(options =>
+           {
+               options.SuppressAsyncSuffixInActionNames = false;
+           });
 
-            //services.AddDbContext<AEDbContext>(options => options.UseInMemoryDatabase("ae_dev"));
-            services.AddDbContext<AEDbContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("AEDbContext"));
-                options.EnableSensitiveDataLogging();
-            });
-
+            //services.AddDbContext<AEDbContext>(options =>
+            //{
+            //    options.UseSqlServer(Configuration.GetConnectionString("AEDbContext"));
+            //    options.EnableSensitiveDataLogging();
+            //});
 
             services.AddSwaggerGen(c =>
             {
